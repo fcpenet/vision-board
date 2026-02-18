@@ -1,3 +1,5 @@
+import secrets
+from datetime import datetime, timezone
 import libsql_client
 from app.config import settings
 
@@ -59,3 +61,21 @@ async def init_db() -> None:
             created_at TEXT NOT NULL
         )
     """)
+    await execute("""
+        CREATE TABLE IF NOT EXISTS api_keys (
+            id INTEGER PRIMARY KEY,
+            key TEXT NOT NULL,
+            created_at TEXT NOT NULL
+        )
+    """)
+
+
+async def get_or_create_api_key() -> tuple[str, bool]:
+    """Return (key, was_just_created). Generates and stores a key on first call."""
+    result = await execute("SELECT key FROM api_keys LIMIT 1")
+    if result.rows:
+        return result.rows[0][0], False
+    key = secrets.token_hex(32)
+    now = datetime.now(timezone.utc).isoformat()
+    await execute("INSERT INTO api_keys (key, created_at) VALUES (?, ?)", [key, now])
+    return key, True

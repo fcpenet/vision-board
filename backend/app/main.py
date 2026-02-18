@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
-from app.db.turso import init_db
+from app.db.turso import init_db, get_or_create_api_key
 from app.api.routes import notes, chat, checklist, documents
 from app.api.deps import verify_api_key
 
@@ -10,6 +10,12 @@ from app.api.deps import verify_api_key
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_db()
+    key, created = await get_or_create_api_key()
+    if created:
+        print("\n" + "=" * 60)
+        print("  API key generated — save this, it won't be shown again:")
+        print(f"  {key}")
+        print("=" * 60 + "\n")
     yield
 
 

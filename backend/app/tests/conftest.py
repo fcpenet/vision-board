@@ -27,9 +27,14 @@ def make_turso_result(rows):
 TEST_API_KEY = "test-api-key"
 
 
+@pytest.fixture(autouse=True)
+def mock_api_key_cache(monkeypatch):
+    """Bypass DB key lookup by pre-seeding the in-memory cache."""
+    monkeypatch.setattr("app.api.deps._cached_key", TEST_API_KEY)
+
+
 @pytest_asyncio.fixture
-async def client(monkeypatch):
-    monkeypatch.setattr("app.api.deps.settings.api_key", TEST_API_KEY)
+async def client():
     async with AsyncClient(
         transport=ASGITransport(app=app),
         base_url="http://test",
