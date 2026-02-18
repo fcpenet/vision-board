@@ -1,9 +1,10 @@
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.db.turso import init_db
 from app.api.routes import notes, chat, checklist, documents
+from app.api.deps import verify_api_key
 
 
 @asynccontextmanager
@@ -22,10 +23,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(notes.router)
-app.include_router(chat.router)
-app.include_router(checklist.router)
-app.include_router(documents.router)
+app.include_router(notes.router, dependencies=[Depends(verify_api_key)])
+app.include_router(chat.router, dependencies=[Depends(verify_api_key)])
+app.include_router(checklist.router, dependencies=[Depends(verify_api_key)])
+app.include_router(documents.router, dependencies=[Depends(verify_api_key)])
 
 
 @app.get("/health")

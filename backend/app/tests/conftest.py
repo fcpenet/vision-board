@@ -24,9 +24,17 @@ def make_turso_result(rows):
 # App client fixture
 # ---------------------------------------------------------------------------
 
+TEST_API_KEY = "test-api-key"
+
+
 @pytest_asyncio.fixture
-async def client():
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+async def client(monkeypatch):
+    monkeypatch.setattr("app.api.deps.settings.api_key", TEST_API_KEY)
+    async with AsyncClient(
+        transport=ASGITransport(app=app),
+        base_url="http://test",
+        headers={"X-API-Key": TEST_API_KEY},
+    ) as ac:
         yield ac
 
 

@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     turso_auth_token: str = ""
     chroma_persist_dir: str = "./chroma_db"
     allowed_origins: str = "http://localhost:5173"
+    api_key: str = ""
 
     @property
     def allowed_origins_list(self) -> list[str]:
